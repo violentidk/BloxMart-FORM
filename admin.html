@@ -1,0 +1,47 @@
+<!-- src/main/resources/templates/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+</head>
+<body>
+    <h1>Admin Page - Form Submissions</h1>
+    <div id="submissions"></div>
+
+    <script>
+        async function fetchSubmissions() {
+            const response = await fetch('/form/admin');
+            const submissions = await response.json();
+            const submissionsDiv = document.getElementById('submissions');
+            submissionsDiv.innerHTML = '';
+
+            submissions.forEach(submission => {
+                submissionsDiv.innerHTML += `
+                    <div>
+                        <h3>${submission.name} (${submission.email})</h3>
+                        <p>Review: ${submission.review || 'No review yet'}</p>
+                        <textarea id="review-${submission.id}" placeholder="Write your review"></textarea>
+                        <button onclick="submitReview(${submission.id})">Submit Review</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function submitReview(id) {
+            const review = document.getElementById(`review-${id}`).value;
+            await fetch(`/form/admin/review/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(review)
+            });
+            fetchSubmissions(); // Refresh submissions
+        }
+
+        fetchSubmissions(); // Initial fetch
+    </script>
+</body>
+</html>
